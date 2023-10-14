@@ -1,6 +1,7 @@
 from collections import UserDict
-from datetime import datetime
+from datetime import datetime,timedelta
 from pathlib import Path
+import clean_folder
 import inspect
 import pickle
 import sys
@@ -120,15 +121,15 @@ class Record:
         return None
     
     def find(self, arg):
-        for i in self:
+        for i in self.phones:
             input(f"<<<<<>>>>>>{i}")
-            if str(i) == phone:
-                return Phone(phone)        
+            if str(i) == arg:
+                return Phone(arg)
         return None
 
 
     def days_to_birthday(self):
-        if not self.birthday or not self.name:
+        if not self.birthday:
             return 0
         current_data = datetime.now().date()
         birthday_date = datetime.strptime(str(self.birthday), "%d/%m/%Y").date()
@@ -137,6 +138,7 @@ class Record:
             return (birthday_date_new - current_data).days
         else:
             return (birthday_date.replace(year=(current_data.year+1)) - current_data).days
+
 
 class AddressBook(UserDict):
 
@@ -174,7 +176,18 @@ class AddressBook(UserDict):
             else:
                 if not stop_check:
                     return
-
+    def contact_for_birthday(self,days):
+        now=datetime.now().date()
+        res=''
+        days_interval=timedelta(days=days)
+        for k,v in self.data.items():
+            if v.birthday.value:
+                date = datetime(year=now.year, month=now.month, day=now.day)+days_interval
+                birthday_date = datetime.strptime(str(v.birthday.value), "%d/%m/%Y").date()
+                birthday_date_new = birthday_date.replace(year=date.year)
+                if date.date()==birthday_date_new:
+                    res+=f'Contact name: {k} phones:'+str(*v.phones)+'\n'
+        return res
 
     def __str__(self):
         print (f"\nAddressBook list name: ")
@@ -201,10 +214,10 @@ def main():
             address_book.data = pickle.load(fh)
         except EOFError:
             pass
-    command, name, phone = "", "", ""
+    command, name, phone,birthday = "", "", "",""
     while True:
         if not command:
-            command = func.input_data("Чекаю команду (hello, add, change, phone, show all,good bay)\n").lower() 
+            command = func.input_data("Чекаю команду (hello, add, change, phone, show all,good bye,when_birthday,contacts_birthday,clean_folder)\n").lower()
         elif command == "hello":
             print("How can I help you?")
             command = ""
@@ -219,13 +232,24 @@ def main():
                 result = func.input_data("Введіть номер телефону (xxxxxxxxxx) (Вийти 'no') \n")
             if result == 'no':
                 continue
+
             if Phone(result).value:
-                user = Record(name)
-                user.add_phone(result)
-                address_book.add_record(user) 
+                if not birthday:
+                    birthday = func.input_data("Введіть день народження (Необов'язково/Пропустити 'skip') \n")
+                    if birthday == 'skip':
+                        birthday = ''
+                if birthday:
+                    user = Record(name,birthday=birthday)
+                    user.add_phone(result)
+                    address_book.add_record(user)
+                else:
+                    user = Record(name)
+                    user.add_phone(result)
+                    address_book.add_record(user)
                 print(f"Додано контакт : {user}")
                 name, phone, command = "", "", ""
             else:
+                birthday=''
                 command = "add"
         elif command == "change":
             print("Зміна реквізитів контакту")
@@ -249,7 +273,7 @@ def main():
                     user = Record(name)
                     user.edit_phone(result,result_one)
                     print(f"Змінено контакт : {user}, телефонний номер {result_one}")
-                    name, phone, command = "", "", ""
+                    birthday,name, phone, command = "", "", "",""
             else:
                 command = "change"
         elif command == "phone":        #задає пошук по номеру назві їх частинах
@@ -270,6 +294,38 @@ def main():
             command = ""
             print("Вивід всіх збеорежених контактів \nІм'я та номер телефону")
             address_book.show_book(0,list=False)
+        elif command=="when_birthday":
+            command=''
+            result = func.input_data("Вкажіть ім'я контакту/(Вийти 'no')\n")
+            if result == 'no':
+                continue
+            else:
+                if result in address_book and address_book[result].days_to_birthday():
+                    if address_book[result].days_to_birthday():
+                        print(address_book[result].days_to_birthday())
+                else:
+                    print(f"не має запису в адресній книзі для: {result}")
+        elif command=="contacts_birthday":
+            command=''
+            result = func.input_data("Вкажіть кількість днів/(Вийти 'no')\n")
+            try:
+                days=int(result)
+            except:
+                raise ValueError('Введіть дні числом')
+            if address_book.contact_for_birthday(int(result)):
+                print(address_book.contact_for_birthday(int(result)))
+            else:
+                print(f'Через {days} днів ні в кого немає день народження')
+        elif command=="clean_folder":
+            command=''
+            result = func.input_data("Вкажіть шлях до папки/(Вийти 'no')\n")
+            if result=='no':
+                continue
+            else:
+                clean_folder.main(result)
+                # except:
+                #     print(f'Невірний шлях до папки')
+                #     command='clean_folder'
         elif command == "good bye":
             command = func.exit_boot(address_book.data)
         elif command == "close":
