@@ -236,7 +236,7 @@ def main():
             if Phone(result).value:
                 if not birthday:
                     birthday = func.input_data("Введіть день народження (Необов'язково/Пропустити 'skip') \n")
-                    if birthday == 'skip':
+                    if birthday == 'skip' or birthday=='':
                         birthday = ''
                 if birthday:
                     user = Record(name,birthday=birthday)
@@ -296,8 +296,8 @@ def main():
             address_book.show_book(0,list=False)
         elif command=="when_birthday":
             command=''
-            result = func.input_data("Вкажіть ім'я контакту/(Вийти 'no')\n")
-            if result == 'no':
+            result = func.input_data("Вкажіть ім'я контакту/(Вийти 'no')/(Вийти 'Enter')\n")
+            if result == 'no' or result=='':
                 continue
             else:
                 if result in address_book and address_book[result].days_to_birthday():
@@ -307,7 +307,9 @@ def main():
                     print(f"не має запису в адресній книзі для: {result}")
         elif command=="contacts_birthday":
             command=''
-            result = func.input_data("Вкажіть кількість днів/(Вийти 'no')\n")
+            result = func.input_data("Вкажіть кількість днів/(Вийти 'no')/(Вийти 'Enter')\n")
+            if result=='' or result=='no':
+                continue
             try:
                 days=int(result)
             except:
@@ -318,14 +320,15 @@ def main():
                 print(f'Через {days} днів ні в кого немає день народження')
         elif command=="clean_folder":
             command=''
-            result = func.input_data("Вкажіть шлях до папки/(Вийти 'no')\n")
-            if result=='no':
+            result = func.input_data("Вкажіть шлях до папки/(Вийти 'no')/(Вийти 'Enter')\n")
+            if result=='no' or result=='':
                 continue
             else:
-                clean_folder.main(result)
-                # except:
-                #     print(f'Невірний шлях до папки')
-                #     command='clean_folder'
+                try:
+                    clean_folder.main(result)
+                except:
+                     print(f'Невірний шлях до папки')
+                     command='clean_folder'
         elif command == "good bye":
             command = func.exit_boot(address_book.data)
         elif command == "close":
