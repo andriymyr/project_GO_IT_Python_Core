@@ -226,7 +226,7 @@ def main():
     command, name, phone,birthday = "", "", "",""
     while True:
         if not command:
-            command = func.input_data("Чекаю команду (hello, add, change, phone, show all,good bay)\n").lower() 
+            command = func.input_data("Чекаю команду (hello, add, change, phone, show all,good bye,when_birthday,contacts_birthday,clean_folder)\n").lower()
         elif command == "hello":
             print("How can I help you?")
             command = ""
