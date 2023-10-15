@@ -4,6 +4,7 @@ from pathlib import Path
 import clean_folder
 import inspect
 import pickle
+import notepad
 import sys
 import func
 import re
@@ -217,7 +218,7 @@ def main():
     command, name, phone,birthday = "", "", "",""
     while True:
         if not command:
-            command = func.input_data("Чекаю команду (hello, add, change, phone, show all, good bye, when_birthday, contacts_birthday, clean_folder)\n").lower()
+            command = func.input_data("Чекаю команду (hello, add, change, phone, show all, good bye, when_birthday, contacts_birthday, clean_folder, note)\n").lower()
         elif command == "hello":
             print("How can I help you?")
             command = ""
@@ -328,6 +329,31 @@ def main():
                 except:
                      print(f'Невірний шлях до папки')
                      command='clean_folder'
+        elif command == "note":
+            name = func.input_data("Введіть ім'я для нотатків (Вийти 'Enter') \n")
+            if not name:
+                print("ім'я не введено")
+                name, note = "", ""
+                continue
+                
+            note = func.input_data("Введіть свої нотатки (Вийти 'exit') \n")
+            if note == 'exit':
+                print('нотатки не введено')
+                continue  
+            #input(f">>>> {notepad.Notes(name).value==''}-")
+            if notepad.Notes(name).value != "":
+                user = notepad.RecordExtension(name)
+                
+                if note not in notepad.Notes(result).value:
+                    user.add_note(result)
+                    # address_book.add_record(user) 
+                    print(f"Додано нотатки для : {user}")
+                else:
+                    user.edit_note(notepad.Notes(result).value, note)             
+             
+                name, note, command = "", "", ""
+            else:
+                print(f"Нотатки для : {user}  не додано")
         elif command == "good bye":
             command = func.exit_boot(address_book.data)
         elif command == "close":
