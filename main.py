@@ -128,8 +128,8 @@ class Record:
     def find(self, arg):
         for i in self.phones:
             input(f"<<<<<>>>>>>{i}")
-            if str(i) == phone:
-                return Phone(phone)        
+            if str(i) == arg:
+                return Phone(arg)        
         return None
 
     def days_to_birthday(self):
