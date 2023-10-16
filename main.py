@@ -91,16 +91,17 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name, address = "", email = "", birthday = ""):
+    def __init__(self, name, birthday = ""):           #address = "", email = "", birthday = ""):
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday)
-        self.address = Address(address)
-        self.email = Email(email)
+        self.address = ""  #Address(address)
+        self.email = "" #Email(email)
+        print(":::::::::::::::", name, ":", birthday, "::", self.birthday)
 
     def __str__(self):
         if self.birthday.value:
-            return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, Birthday: {self.birthday.value}"
+            return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, Birthday: {self.birthday.value}\naddress: {self.address.value}, e-mail: {self.email.value}"
         else:
             return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
 
@@ -197,6 +198,18 @@ class AddressBook(UserDict):
                 if not stop_check:
                     return
 
+    def contact_for_birthday(self,days):
+        now=datetime.now().date()
+        res=''
+        days_interval=timedelta(days=days)
+        for k,v in self.data.items():
+            if v.birthday.value:
+                date = datetime(year=now.year, month=now.month, day=now.day)+days_interval
+                birthday_date = datetime.strptime(str(v.birthday.value), "%d/%m/%Y").date()
+                birthday_date_new = birthday_date.replace(year=date.year)
+                if date.date()==birthday_date_new:
+                    res+=f'Contact name: {k} phones:'+str(*v.phones)+'\n'
+        return res
 
     def __str__(self):
         print(f"\nAddressBook list name: ")
@@ -233,11 +246,14 @@ def suggest_command(user_input):
 def main():
     note_book=Note_book()
     address_book = AddressBook()
-    with open("adressbook.bin", "rb") as fh:
-        try:
+    try:
+        with open("adressbook.bin", "rb") as fh:
             address_book.data = pickle.load(fh)
-        except EOFError:
-            pass
+    except EOFError:
+        pass
+    except FileNotFoundError:
+        pass
+
     command, name, phone, birthday = "", "", "",""
     while True:
         if not command:
@@ -265,21 +281,26 @@ def main():
                     birthday = func.input_data("Введіть день народження (Необов'язково/Пропустити 'skip') \n")
                     if birthday == 'skip' or birthday=='':
                         birthday = ''
-                if birthday:
-                    user = Record(name,birthday=birthday)
-                    user.add_phone(result)
-                    address_book.add_record(user)
-                else:
-                    user = Record(name)
-                    user.add_phone(result)
-                    address_book.add_record(user)
+                #if birthday:
+                #    user = Record(name, birthday=birthday)
+                #    user.add_phone(result)
+                #    address_book.add_record(user)
+                #else:
+                #    user = Record(name)
+                #    user.add_phone(result)
+                #    address_book.add_record(user)
                 address = func.input_data("Введіть адресу (Вийти 'no') \n")
                 if address == 'no':
                     continue
                 email = func.input_data("Введіть email (Вийти 'no') \n")
                 if email == 'no':
                     continue
-                user = Record(name)
+                #user = Record(name)
+                print("---",birthday)
+                if birthday:
+                    user = Record(name, birthday=birthday)
+                else:
+                    user = Record(name)
                 user.add_phone(result)
                 user.add_address(address)
                 user.add_email(email)
