@@ -7,7 +7,7 @@ import pickle
 import sys
 import func
 import re
-
+import difflib
 
 
 class Field:
@@ -28,19 +28,19 @@ class Birthday(Field):
     def __init__(self, value):
         super().__init__(value)
         self.__value = self.is_data(value)
-    
+
     def is_data(self, value):
         if value is None:
             return None
-        value = value.replace(".","/")
+        value = value.replace(".", "/")
         day_pattern = r"\d{2}/\d{2}/\d{4}"
         if not re.match(day_pattern, value):
-            raise ValueError ("неправильний формат дати")
+            raise ValueError("неправильний формат дати")
         try:
             datetime.strptime(value, "%d/%m/%Y")
             return value
         except ValueError:
-            raise ValueError ("неправильно вказано дату")
+            raise ValueError("неправильно вказано дату")
             return None
 
     @property
@@ -58,19 +58,17 @@ class Phone(Field):
         try:
             self.value = self.is_phone(value)
         except ValueError:
-            print ("неправильний номер телефону _")
+            print("неправильний номер телефону _")
             self.value = ""
-
-
 
     def is_phone(self, value):
         phone_pattern = r"^[0-9]{10}$"
         if not re.match(phone_pattern, value):
-            #print ("неправильний номер телефону ", value)
+            # print ("неправильний номер телефону ", value)
             return ""
-            #raise ValueError 
+            # raise ValueError
         return value
-    
+
     @property
     def value(self):
         return self.__value
@@ -81,17 +79,19 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name, birthday = None):
+    def __init__(self, name, birthday=None):
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday)
+        self.address = None
+        self.email = None
 
     def __str__(self):
         if self.birthday.value:
             return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, Birthday: {self.birthday.value}"
         else:
             return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
-    
+
     def add_phone(self, phone):
         for i in self.phones:
             if str(i) == phone:
@@ -100,7 +100,13 @@ class Record:
         if result.value:
             self.phones.append(result)
         else:
-            print (f"телефон {phone} не додано: неправильний номер телефону")
+            print(f"телефон {phone} не додано: неправильний номер телефону")
+
+    def add_address(self, address):
+        self.address = Address(address)
+
+    def add_email(self, email):
+        self.email = Email(email)
 
     def remove_phone(self, phone):
         self.phones = [p for p in self.phones if str(p) != phone]
@@ -110,23 +116,22 @@ class Record:
             self.remove_phone(phone_old)
             self.add_phone(phone_new)
         else:
-            raise ValueError 
-        #(f"Такого номера не існує: {phone}")
-        return 
+            raise ValueError
+            # (f"Такого номера не існує: {phone}")
+        return
 
     def find_phone(self, phone):
         for i in self.phones:
             if str(i) == phone:
-                return Phone(phone)        
+                return Phone(phone)
         return None
-    
+
     def find(self, arg):
         for i in self.phones:
             input(f"<<<<<>>>>>>{i}")
             if str(i) == arg:
                 return Phone(arg)
         return None
-
 
     def days_to_birthday(self):
         if not self.birthday:
@@ -137,7 +142,7 @@ class Record:
         if birthday_date_new >= current_data:
             return (birthday_date_new - current_data).days
         else:
-            return (birthday_date.replace(year=(current_data.year+1)) - current_data).days
+            return (birthday_date.replace(year=(current_data.year + 1)) - current_data).days
 
 
 class AddressBook(UserDict):
@@ -146,17 +151,17 @@ class AddressBook(UserDict):
         super().__init__()
 
     def add_record(self, value):
-        self.data[value.name.value] = value  
+        self.data[value.name.value] = value
 
     def find(self, value):
         return self.data.get(value)
-    
+
     def delete(self, value):
         for key, i in self.data.items():
             if value in str(i):
                 return self.data.pop(key, "і не було")
-    
-    def show_book(self, count = 0, list = False):
+
+    def show_book(self, count=0, list=False):
         # вивід адресної книги
         # count = 0 - вся книга, або вказана кількість строк
         # list = False - тільки вказана кількості строк, True - вся книга, але з розбиттям по вказаній кількості строк
@@ -164,7 +169,7 @@ class AddressBook(UserDict):
         stop_check = count
         msg = None
         list = list if list == False else True
-        for i in self.data.values():  #address_book:
+        for i in self.data.values():  # address_book:
             print(i)
             stop_check -= 1
             if list:
@@ -176,25 +181,14 @@ class AddressBook(UserDict):
             else:
                 if not stop_check:
                     return
-    def contact_for_birthday(self,days):
-        now=datetime.now().date()
-        res=''
-        days_interval=timedelta(days=days)
-        for k,v in self.data.items():
-            if v.birthday.value:
-                date = datetime(year=now.year, month=now.month, day=now.day)+days_interval
-                birthday_date = datetime.strptime(str(v.birthday.value), "%d/%m/%Y").date()
-                birthday_date_new = birthday_date.replace(year=date.year)
-                if date.date()==birthday_date_new:
-                    res+=f'Contact name: {k} phones:'+str(*v.phones)+'\n'
-        return res
+
 
     def __str__(self):
-        print (f"\nAddressBook list name: ")
-        for i in self.data.values():   
+        print(f"\nAddressBook list name: ")
+        for i in self.data.values():
             print(i)
         return "AddressBook"
-    
+
     def __iter__(self):
         self.records_iterator = iter(self.data.values())
         return self
@@ -205,6 +199,33 @@ class AddressBook(UserDict):
             raise StopIteration
         return data
 
+
+class Address(Field):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self):
+        return f"Address: {self.value}"
+
+
+class Email(Field):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self):
+        return f"Email: {self.value}"
+
+
+base_commands = ["hello", "add", "change", "phone", "show all", "good bay", "exit", "close"]
+
+
+def suggest_command(user_input):
+    best_match = difflib.get_close_matches(user_input, base_commands, n=1, cutoff=0.75)
+
+    if best_match:
+        return f"Можливо ви мали на увазі команду '{best_match[0]}'?"
+    else:
+        return "Не знайдено відповідної команди."
 
 
 def main():
@@ -217,7 +238,11 @@ def main():
     command, name, phone,birthday = "", "", "",""
     while True:
         if not command:
-            command = func.input_data("Чекаю команду (hello, add, change, phone, show all, good bye, when_birthday, contacts_birthday, clean_folder)\n").lower()
+            command = func.input_data("Чекаю команду (hello, add, change, phone, show all,good bay)\n").lower()
+            if command not in base_commands:
+                suggestion = suggest_command(command)
+                print(suggestion)
+                continue
         elif command == "hello":
             print("How can I help you?")
             command = ""
@@ -226,7 +251,7 @@ def main():
             if not name:
                 name = func.input_data("Введіть ім'я (Вийти 'Enter') \n")
             if not name:
-                name, phone = "", ""
+                name, phone, address, email = "", "", "", ""
                 continue
             elif not phone:
                 result = func.input_data("Введіть номер телефону (xxxxxxxxxx) (Вийти 'no') \n")
@@ -245,8 +270,19 @@ def main():
                     user = Record(name)
                     user.add_phone(result)
                     address_book.add_record(user)
+                address = func.input_data("Введіть адресу (Вийти 'no') \n")
+                if address == 'no':
+                    continue
+                email = func.input_data("Введіть email (Вийти 'no') \n")
+                if email == 'no':
+                    continue
+                user = Record(name)
+                user.add_phone(result)
+                user.add_address(address)
+                user.add_email(email)
+                address_book.add_record(user)
                 print(f"Додано контакт : {user}")
-                name, phone, command = "", "", ""
+                name, phone, address, email, command = "", "", "", "", ""
             else:
                 birthday=''
                 command = "add"
@@ -262,7 +298,8 @@ def main():
                 print(address_book.find(name))
                 result = func.input_data("Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
                 if Phone(result).value:
-                    result_one = func.input_data("Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
+                    result_one = func.input_data(
+                        "Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
             if result == 'no':
                 continue
             if result_one == 'no':
@@ -270,12 +307,12 @@ def main():
             if Phone(result).value:
                 if Phone(result_one).value:
                     user = Record(name)
-                    user.edit_phone(result,result_one)
+                    user.edit_phone(result, result_one)
                     print(f"Змінено контакт : {user}, телефонний номер {result_one}")
                     birthday,name, phone, command = "", "", "",""
             else:
                 command = "change"
-        elif command == "phone":        #задає пошук по номеру назві їх частинах
+        elif command == "phone":  # задає пошук по номеру назві їх частинах
             command = ""
             print("Пошук телефонну/контакту")
             result = func.input_data("Введіть ім'я обо номер телефону /можна частково/ через прбіл (Вийти 'Enter') \n")
@@ -283,16 +320,16 @@ def main():
                 command = "phone"
                 continue
             for i in (result.split(" ")):
-                for result in address_book:                  
+                for result in address_book:
                     if i in str(result):
-                        print("Значення пошуку {:>20}, результат {:>50}.".format(i, str(result))) 
-                        #print(f"Значення пошуку {i}, результат {result}")
+                        print("Значення пошуку {:>20}, результат {:>50}.".format(i, str(result)))
+                        # print(f"Значення пошуку {i}, результат {result}")
                     else:
-                        print (f"не має запису в адресній книзі для: {i}")
+                        print(f"не має запису в адресній книзі для: {i}")
         elif command == "show all":
             command = ""
             print("Вивід всіх збеорежених контактів \nІм'я та номер телефону")
-            address_book.show_book(0,list=False)
+            address_book.show_book(0, list=False)
         elif command=="when_birthday":
             command=''
             result = func.input_data("Вкажіть ім'я контакту/(Вийти 'no')/(Вийти 'Enter')\n")
@@ -333,28 +370,26 @@ def main():
         elif command == "close":
             command = func.exit_boot(address_book.data)
         elif command == "exit":
-            #func.exit_boot(address_book, classes_used)
+            # func.exit_boot(address_book, classes_used)
             func.exit_boot(address_book.data)
             break
         else:
-            print("Не існує такої команди")
             command = ""
-
-
 
 
 if __name__ == "__main__":
 
-    classes_used = []        
+    classes_used = []
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isclass(obj):
             classes_used.append(obj)
-    
-    main()
-    #file_name = 'data.bin'
 
-    #with open(file_name, "wb") as fh:
+    main()
+    # file_name = 'data.bin'
+
+    # with open(file_name, "wb") as fh:
     #    pickle.dump(some_data, fh)
+
 
 
 
@@ -384,5 +419,4 @@ if __name__ == "__main__":
 
     address_book.show_book()
 
-
-""" 
+"""
