@@ -79,12 +79,12 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name, birthday=None):
+    def __init__(self, name, address = None, email = None, birthday = None):
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday)
-        self.address = None
-        self.email = None
+        self.address = address
+        self.email = email
 
     def __str__(self):
         if self.birthday.value:
@@ -216,7 +216,7 @@ class Email(Field):
         return f"Email: {self.value}"
 
 
-base_commands = ["hello", "add", "change", "phone", "show all", "good bay", "exit", "close"]
+base_commands = ["hello", "add", "change", "phone", "show all", "when_birthday", "contacts_birthday", "clean_folder", "good bay", "exit", "close"]
 
 
 def suggest_command(user_input):
@@ -235,10 +235,10 @@ def main():
             address_book.data = pickle.load(fh)
         except EOFError:
             pass
-    command, name, phone,birthday = "", "", "",""
+    command, name, phone, birthday = "", "", "",""
     while True:
         if not command:
-            command = func.input_data("Чекаю команду (hello, add, change, phone, show all,good bay)\n").lower()
+            command = func.input_data(f"Чекаю команду\n{base_commands}\n").lower()
             if command not in base_commands:
                 suggestion = suggest_command(command)
                 print(suggestion)
