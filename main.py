@@ -8,7 +8,7 @@ import sys
 import func
 import re
 import difflib
-from notepad_old import Note,Note_book
+from notepad_old import Note, Note_book
 
 class Field:
     def __init__(self, value):
@@ -24,24 +24,37 @@ class Name(Field):
         self.name = name
 
 
+class Address(Field):
+    def __init__(self, value):
+        super().__init__(value)
+
+    def __str__(self):
+        return f"Address: {self.value}"
+
+
+class Email(Field):
+    def __init__(self, value):
+        super().__init__(value)
+        self.value = self.is_data(value)
+
+    def is_data(self, value):
+        if value != "":
+            value = func.verification_emails(value)
+        return value
+
+    def __str__(self):
+        return f"Email: {self.value}"
+
+
 class Birthday(Field):
     def __init__(self, value):
         super().__init__(value)
         self.__value = self.is_data(value)
 
     def is_data(self, value):
-        if value is None:
-            return None
-        value = value.replace(".", "/")
-        day_pattern = r"\d{2}/\d{2}/\d{4}"
-        if not re.match(day_pattern, value):
-            raise ValueError("неправильний формат дати")
-        try:
-            datetime.strptime(value, "%d/%m/%Y")
-            return value
-        except ValueError:
-            raise ValueError("неправильно вказано дату")
-            return None
+        if value != "":
+            value = func.verification_data(value)
+        return value
 
     @property
     def value(self):
@@ -62,11 +75,10 @@ class Phone(Field):
             self.value = ""
 
     def is_phone(self, value):
-        phone_pattern = r"^[0-9]{10}$"
-        if not re.match(phone_pattern, value):
-            # print ("неправильний номер телефону ", value)
+        phone_pattern_1 = r"^[0-9]{10}$"
+        phone_pattern_2 = r"^[0-9]{12}$"
+        if (re.match(phone_pattern_1, value) == re.match(phone_pattern_2, value)):
             return ""
-            # raise ValueError
         return value
 
     @property
@@ -79,12 +91,12 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name, address = None, email = None, birthday = None):
+    def __init__(self, name, address = "", email = "", birthday = ""):
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday)
-        self.address = address
-        self.email = email
+        self.address = Address(address)
+        self.email = Email(email)
 
     def __str__(self):
         if self.birthday.value:
@@ -108,6 +120,9 @@ class Record:
     def add_email(self, email):
         self.email = Email(email)
 
+    def add_birthday(self, birthday):
+        self.email = Birthday(birthday)
+
     def remove_phone(self, phone):
         self.phones = [p for p in self.phones if str(p) != phone]
 
@@ -126,12 +141,12 @@ class Record:
                 return Phone(phone)
         return None
 
-    def find(self, arg):
-        for i in self.phones:
-            input(f"<<<<<>>>>>>{i}")
-            if str(i) == arg:
-                return Phone(arg)
-        return None
+    #def find(self, arg):
+    #    for i in self.phones:
+    #        input(f"<<<<<>>>>>>{i}")
+    #        if str(i) == arg:
+    #            return Phone(arg)
+    #    return None
 
     def days_to_birthday(self):
         if not self.birthday:
@@ -200,23 +215,10 @@ class AddressBook(UserDict):
         return data
 
 
-class Address(Field):
-    def __init__(self, value):
-        super().__init__(value)
-
-    def __str__(self):
-        return f"Address: {self.value}"
 
 
-class Email(Field):
-    def __init__(self, value):
-        super().__init__(value)
 
-    def __str__(self):
-        return f"Email: {self.value}"
-
-
-base_commands = ["hello", "add", "change", "phone", "show all", "when_birthday", "contacts_birthday", "clean_folder", "good bye", "exit", "close","add_note","find_note","sort_notes","show_notes"]
+base_commands = ["hello", "add", "change", "phone", "show all", "when_birthday", "contacts_birthday", "clean_folder", "good bye", "exit", "close", "add_note", "find_note", "sort_notes", "show_notes"]
 
 
 def suggest_command(user_input):

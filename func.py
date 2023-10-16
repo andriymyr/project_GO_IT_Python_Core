@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta
 import pickle
+import re
 
 
 def input_error(func):
@@ -10,6 +12,7 @@ def input_error(func):
         return result
 
     return inner
+
 
 @input_error
 def input_data(necessary_data):
@@ -26,5 +29,23 @@ def exit_boot(*arg):
 
     return "exit"
 
+def verification_data(value):
+    value = value.replace(".", "/")
+    day_pattern = r"\d{2}/\d{2}/\d{4}"
+    if not re.match(day_pattern, value):
+        raise ValueError("неправильний формат дати")
+    try:
+        datetime.strptime(value, "%d/%m/%Y")
+        return value
+    except ValueError:
+        #raise ValueError("неправильно вказано дату")
+        return ""
 
-
+def verification_emails(text):
+    """
+    перевірка правильності написання e-mail
+    """
+    text = re.findall(r"[a-zA-Z][a-zA-Z._0-9]+@\w+\.+\w\w+", text)
+    if text == []:
+        print ("Введено неправильний e-mail")
+    return text
