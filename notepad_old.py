@@ -1,54 +1,32 @@
+from collections import UserDict
+class Note:
+    def __init__(self,text,tag):
+        self.text = text
+        self.tag = [i.title() for i in tag.split('#')[1:]]
+class Note_book(UserDict):
+    def add_note(self,note):
+        for i in note.tag:
+            if i in self.data:
+                self.data[i].append(note)
+            else:
+                self.data[i]=[note]
+    def sort_notes(self):
+        note_tags=self.data.keys()
+        list_keys=list(note_tags)
+        list_keys=sorted(list_keys)
+        sorted_dict={}
+        for i in list_keys:
+            sorted_dict[i]=self.data[i]
+        self.data=sorted_dict
+    def find_notes(self,tag):
+        tag=[i.title() for i in tag.split('#')[1:]]
+        find_notes=[]
+        for k,v in self.data.items():
+            for i in v:
+                if i.tag==tag and i.text not in find_notes:
+                    find_notes.append(i.text)
+        return find_notes
 
-from main import Field, Record
-class Notes(Field):
-    def __init__(self, value):
-        super().__init__(value)
-        try:
-            self.value = self.is_note(value)
-        except ValueError:
-            print ("Формат нотатків: не меньше 3 символів")
-            self.value = ""
-
-    def is_note(self, value):
-        if not value or len(value)<3:
-            print ("Формат нотатків: не меньше 3 символів")
-            return ""
-            #raise ValueError
-        return value
-
-
-class RecordExtension(Record):
-    def __init__(self):
-        super().__init__()
-        self.notes = []
-
-    def add_note(self, note):
-        for i in self.notes:
-            if str(i) == note:
-                return False
-        result = Notes(note)
-        if result.value:
-            self.notes.append(result)
-            print(f"нотаток: {note}  - додано")
-        else:
-            print (f"нотаток: {note}  - не додано")
-
-    def remove_note(self, note):
-        self.notes = [p for p in self.notes if str(p) != note]
-
-    def find_note(self, note):
-        for i in self.notes:
-            if str(i) == note:
-                return Notes(note)
-        return None
-
-    def edit_note(self, note_old, note_new):
-        if self.find_note(note_old):
-            self.remove_note(note_old)
-            self.add_note(note_new)
-        else:
-            raise ValueError
-        return
 
 if __name__ == "__main__":
 

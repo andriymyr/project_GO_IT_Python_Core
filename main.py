@@ -8,7 +8,7 @@ import sys
 import func
 import re
 import difflib
-
+from notepad_old import Note,Note_book
 
 class Field:
     def __init__(self, value):
@@ -216,7 +216,7 @@ class Email(Field):
         return f"Email: {self.value}"
 
 
-base_commands = ["hello", "add", "change", "phone", "show all", "when_birthday", "contacts_birthday", "clean_folder", "good bay", "exit", "close"]
+base_commands = ["hello", "add", "change", "phone", "show all", "when_birthday", "contacts_birthday", "clean_folder", "good bye", "exit", "close","add_note","find_note","sort_notes","show_notes"]
 
 
 def suggest_command(user_input):
@@ -229,6 +229,7 @@ def suggest_command(user_input):
 
 
 def main():
+    note_book=Note_book()
     address_book = AddressBook()
     with open("adressbook.bin", "rb") as fh:
         try:
@@ -365,6 +366,51 @@ def main():
                 except:
                      print(f'Невірний шлях до папки')
                      command='clean_folder'
+        elif command=='add_note':
+            command=''
+            try:
+                result=func.input_data("Напишіть ключове слово(#..)/їх може бути декілька/Вийти no\n")
+            except:
+                print('Некоректно введено тег')
+                command='add_note'
+                continue
+            if result=='' or result=='no' or result[0]!='#':
+                print('Некоректно введено тег')
+                continue
+            text=[]
+            print('Напишіть саму нотатку(Вийти no)')
+            while True:
+                result2=input()
+                if result2=='no' or result2=='':
+                    break
+                text.append(result2)
+            if text:
+                text = '\n'.join(text)
+                note=Note(text,result)
+                note_book.add_note(note)
+        elif command == "sort_notes":
+            command=''
+            note_book.sort_notes()
+            print('Нотатки відсортовано')
+        elif command == "find_note":
+            command=''
+            result = func.input_data("Напишіть ключове слово(#..)/їх може бути декілька/Вийти no\n")
+            if result=='' or result == 'no':
+                continue
+            matches = note_book.find_notes(result)
+            if matches:
+                for i in matches:
+                    print(i)
+            else:
+                print("Немає нотатків по такому тегу")
+                command='find_note'
+        elif command == "show_notes":
+            command = ''
+            if note_book.data:
+                for tags in note_book.data:
+                    print('#'+tags)
+                    for note in note_book.data[tags]:
+                        print(f"{note.text}")
         elif command == "good bye":
             command = func.exit_boot(address_book.data)
         elif command == "close":
