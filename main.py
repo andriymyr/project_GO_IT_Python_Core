@@ -362,7 +362,7 @@ def main():
             else:
                 if result in address_book and address_book[result].days_to_birthday():
                     if address_book[result].days_to_birthday():
-                        print(address_book[result].days_to_birthday())
+                        print(f'День народження у {result} буде через {address_book[result].days_to_birthday()} днів')
                 else:
                     print(f"не має запису в адресній книзі для: {result}")
         elif command=="contacts_birthday":
