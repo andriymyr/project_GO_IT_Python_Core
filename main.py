@@ -343,13 +343,16 @@ def main():
             if result == "":
                 command = "phone"
                 continue
+            found = False
             for i in (result.split(" ")):
                 for result in address_book:
                     if i in str(result):
-                        print("Значення пошуку {:>20}, результат {:>50}.".format(i, str(result)))
+                        print("Значення пошуку '{:>1}', результат: {:>50}.".format(i, str(result)))
+                        found = True
+                        break
                         # print(f"Значення пошуку {i}, результат {result}")
-                    else:
-                        print(f"не має запису в адресній книзі для: {i}")
+            if not found:
+                print(f"не має запису в адресній книзі для: {i}")
         elif command == "show all":
             command = ""
             print("Вивід всіх збеорежених контактів \nІм'я та номер телефону")
@@ -372,8 +375,10 @@ def main():
                 continue
             try:
                 days=int(result)
-            except:
-                raise ValueError('Введіть дні числом')
+            except ValueError:
+                print('Дні потрібно вводити числом')
+                continue
+
             if address_book.contact_for_birthday(int(result)):
                 print(address_book.contact_for_birthday(int(result)))
             else:
