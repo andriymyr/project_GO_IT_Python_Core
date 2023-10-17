@@ -8,14 +8,11 @@ import sys
 import func
 import re
 import difflib
-from notepad import Note, Note_book
+from notepad_old import Note, Note_book
 
 class Field:
     def __init__(self, value):
         self.value = value
-
-    def __str__(self):
-        return str(self.value)
 
 
 class Name(Field):
@@ -53,7 +50,7 @@ class Birthday(Field):
 
     def is_data(self, value):
         if value != "":
-            value = func.verification_data(value)
+            value = func.verification_date(value)
         return value
 
     @property
@@ -91,7 +88,7 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, *name, birthday = ""):           #address = "", email = "", birthday = ""):
+    def __init__(self, name, birthday = ""):           #address = "", email = "", birthday = ""):
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday)
@@ -137,17 +134,10 @@ class Record:
 
     def find_phone(self, phone):
         for i in self.phones:
-            print ("lll",i)
             if str(i) == phone:
                 return Phone(phone)
         return None
 
-    #def find(self, arg):
-    #    for i in self.phones:
-    #        input(f"<<<<<>>>>>>{i}")
-    #        if str(i) == arg:
-    #            return Phone(arg)
-    #    return None
 
     def days_to_birthday(self):
         if not self.birthday:
@@ -246,11 +236,9 @@ def suggest_command(user_input):
 def main():
     note_book=Note_book()
     address_book = AddressBook()
-    records = Record()
     try:
         with open("adressbook.bin", "rb") as fh:
             address_book.data = pickle.load(fh)
-            address_book.data, note_book.data, records.address, records.birthday, records.email, records.name, records.phones
     except EOFError:
         pass
     except FileNotFoundError:
@@ -297,8 +285,6 @@ def main():
                 email = func.input_data("Введіть email (Вийти 'no') \n")
                 if email == 'no':
                     continue
-                #user = Record(name)
-                print("---",birthday)
                 if birthday:
                     user = Record(name, birthday=birthday)
                 else:
@@ -316,38 +302,23 @@ def main():
             print("Зміна реквізитів контакту")
             command = ""
             if not name:
-                name = func.input_data("Введіть ім'я (Вийти 'Enter') \n").lower()
+                name = func.input_data("Введіть ім'я (Вийти 'Enter') \n")
             if not name:
                 name, phone = "", ""
                 continue
-            if address_book.find(name) == None:
-                print ("Не існує такого контакту")
-                name, phone = "", ""
-                continue
             elif not phone:
-                user = Record(name)
                 print(address_book.find(name))
                 result = func.input_data("Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
-                if address_book[name].find_phone(result) == None:
-                    print ("Введено неправильний номер телефону")
-                    command = "change"
-                    continue
-                else:
-                    result_one = func.input_data("Введіть новий номер телефону (xxxxxxxxxx) (Вийти 'no') \n")
-                #else:
-                #    print ("Введено неправильний номер телефону")
-                #    command = "change"
-                #    continue
+                if Phone(result).value:
+                    result_one = func.input_data(
+                        "Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
             if result == 'no':
                 continue
             if result_one == 'no':
                 continue
-
             if Phone(result).value:
                 if Phone(result_one).value:
                     user = Record(name)
-                    print (result,result_one)
-                    print (type(result),type(result_one))
                     user.edit_phone(result, result_one)
                     print(f"Змінено контакт : {user}, телефонний номер {result_one}")
                     birthday,name, phone, command = "", "", "",""
@@ -360,22 +331,17 @@ def main():
             if result == "":
                 command = "phone"
                 continue
-            flag = True
-            num = 1
             for i in (result.split(" ")):
                 for result in address_book:
                     if i in str(result):
-                        print("№ {:>5} :  {:<50}.".format(num, str(result)))
-                        flag = False
-                        num += 1
-            if flag:
-                print(f"не має запису в адресній книзі для: {i}")
+                        print("Значення пошуку {:>20}, результат {:>50}.".format(i, str(result)))
+                        # print(f"Значення пошуку {i}, результат {result}")
+                    else:
+                        print(f"не має запису в адресній книзі для: {i}")
         elif command == "show all":
-            result = func.input_data("Вкажіть кількість контактів для виводу ('Enter' або 0 - все одразу, 1,2,3... - вказує на кількість контактів для виводу за раз)\n")
-            result = result if re.match(r"[0-9]+", result) else 0
             command = ""
             print("Вивід всіх збеорежених контактів \nІм'я та номер телефону")
-            address_book.show_book(int(result), list=True)
+            address_book.show_book(0, list=False)
         elif command=="when_birthday":
             command=''
             result = func.input_data("Вкажіть ім'я контакту/(Вийти 'no')/(Вийти 'Enter')\n")
@@ -457,12 +423,12 @@ def main():
                     for note in note_book.data[tags]:
                         print(f"{note.text}")
         elif command == "good bye":
-            command = func.exit_boot(address_book.data, note_book.data, records.address, records.birthday, records.email, records.name, records.phones)
+            command = func.exit_boot(address_book.data)
         elif command == "close":
-            command = func.exit_boot(address_book.data, note_book.data, records.address, records.birthday, records.email, records.name, records.phones)
+            command = func.exit_boot(address_book.data)
         elif command == "exit":
             # func.exit_boot(address_book, classes_used)
-            func.exit_boot(address_book.data, note_book.data, records.address, records.birthday, records.email, records.name, records.phones)
+            func.exit_boot(address_book.data)
             break
         else:
             command = ""

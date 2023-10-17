@@ -29,7 +29,7 @@ def exit_boot(*arg):
 
     return "exit"
 
-def verification_data(value):
+def verification_date(value):
     value = value.replace(".", "/")
     day_pattern = r"\d{2}/\d{2}/\d{4}"
     if not re.match(day_pattern, value):
