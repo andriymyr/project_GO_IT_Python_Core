@@ -467,36 +467,6 @@ def main():
         else:
             print(f"Команда '{command}' не знайдена.")
 
-"""
-        if commands is None:
-            print(f"Команда '{command}' не знайдена.")
-        elif command == 'hello':
-            result = commands()
-        elif command == 'add':
-            add_contact(address_book)  
-        elif command == 'show all':
-            show_all(address_book)
-        elif command == 'add_note':
-            add_note(note_book)
-        elif command == 'find_note':
-            find_note(note_book)
-        elif command == 'sort_notes':
-            sort_notes(note_book)
-        elif command == 'show_notes':
-            show_notes(note_book)
-        elif command == 'when_birthday':
-            when_birthday(address_book)
-        elif command == 'contacts_birthday':
-            when_birthday(address_book)
-        elif command == 'scleans_folder':
-            result = commands()
-        elif command == 'good bye' or command == 'close' or command == 'exit':
-            func.exit_boot(address_book, note_book)
-            break
-        else:
-            result = commands()
-
-"""
 
 """
     'change': change,
