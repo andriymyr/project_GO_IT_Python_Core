@@ -8,7 +8,10 @@ import sys
 import func
 import re
 import difflib
-from notepad_old import Note, Note_book
+from notepad import Note, Note_book
+
+
+BASE_COMMANDS = ["hello", "add", "change", "phone", "show all", "when_birthday", "contacts_birthday", "clean_folder", "good bye", "exit", "close", "add_note", "find_note", "sort_notes", "show_notes"]
 
 class Field:
     def __init__(self, value):
@@ -22,6 +25,9 @@ class Name(Field):
     def __init__(self, name):
         super().__init__(name)
         self.name = name
+
+    def __str__(self):
+        return f"Name: {self.value}"
 
 
 class Address(Field):
@@ -40,6 +46,8 @@ class Email(Field):
     def is_data(self, value):
         if value != "":
             value = func.verification_emails(value)
+        else:
+            value = 'No record'
         return value
 
     def __str__(self):
@@ -95,9 +103,9 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday)
-        self.address = ""  #Address(address)
-        self.email = "" #Email(email)
-        print(":::::::::::::::", name, ":", birthday, "::", self.birthday)
+        self.address = None  #Address(address)
+        self.email = None #Email(email)
+        # print(":::::::::::::::", name, ":", birthday, "::", self.birthday)
 
     def __str__(self):
         if self.birthday.value:
@@ -113,7 +121,7 @@ class Record:
         if result.value:
             self.phones.append(result)
         else:
-            print(f"телефон {phone} не додано: неправильний номер телефону")
+            raise ValueError(f"Телефон {phone} не додано: неправильний номер телефону")
 
     def add_address(self, address):
         self.address = Address(address)
@@ -125,29 +133,20 @@ class Record:
         self.email = Birthday(birthday)
 
     def remove_phone(self, phone):
-        self.phones = [p for p in self.phones if str(p) != phone]
+        self.phones = [new_phone for new_phone in self.phones if str(new_phone) != phone]
 
     def edit_phone(self, phone_old, phone_new):
         if self.find_phone(phone_old):
             self.remove_phone(phone_old)
             self.add_phone(phone_new)
         else:
-            raise ValueError
-            # (f"Такого номера не існує: {phone}")
-        return
+            raise ValueError("Phone number not found")
 
     def find_phone(self, phone):
         for i in self.phones:
             if str(i) == phone:
                 return Phone(phone)
         return None
-
-    #def find(self, arg):
-    #    for i in self.phones:
-    #        input(f"<<<<<>>>>>>{i}")
-    #        if str(i) == arg:
-    #            return Phone(arg)
-    #    return None
 
     def days_to_birthday(self):
         if not self.birthday:
@@ -163,8 +162,6 @@ class Record:
 
 class AddressBook(UserDict):
 
-    def __init__(self):
-        super().__init__()
 
     def add_record(self, value):
         self.data[value.name.value] = value
@@ -198,18 +195,18 @@ class AddressBook(UserDict):
                 if not stop_check:
                     return
 
-    def contact_for_birthday(self,days):
-        now=datetime.now().date()
-        res=''
-        days_interval=timedelta(days=days)
-        for k,v in self.data.items():
-            if v.birthday.value:
+    def contact_for_birthday(self, days):
+        now = datetime.now().date()
+        result = ''
+        days_interval = timedelta(days=days)
+        for key, value in self.data.items():
+            if value.birthday.value:
                 date = datetime(year=now.year, month=now.month, day=now.day)+days_interval
-                birthday_date = datetime.strptime(str(v.birthday.value), "%d/%m/%Y").date()
+                birthday_date = datetime.strptime(str(value.birthday.value), "%d/%m/%Y").date()
                 birthday_date_new = birthday_date.replace(year=date.year)
-                if date.date()==birthday_date_new:
-                    res+=f'Contact name: {k} phones:'+str(*v.phones)+'\n'
-        return res
+                if date.date() == birthday_date_new:
+                    result += f'Contact name: {key} phones:'+str(*value.phones)+'\n'
+        return result
 
     def __str__(self):
         print(f"\nAddressBook list name: ")
@@ -228,14 +225,8 @@ class AddressBook(UserDict):
         return data
 
 
-
-
-
-base_commands = ["hello", "add", "change", "phone", "show all", "when_birthday", "contacts_birthday", "clean_folder", "good bye", "exit", "close", "add_note", "find_note", "sort_notes", "show_notes"]
-
-
 def suggest_command(user_input):
-    best_match = difflib.get_close_matches(user_input, base_commands, n=1, cutoff=0.75)
+    best_match = difflib.get_close_matches(user_input, BASE_COMMANDS, n=1, cutoff=0.75)
 
     if best_match:
         return f"Можливо ви мали на увазі команду '{best_match[0]}'?"
@@ -255,10 +246,12 @@ def main():
         pass
 
     command, name, phone, birthday = "", "", "",""
+
+    exit_called = False
     while True:
         if not command:
-            command = func.input_data(f"Чекаю команду\n{base_commands}\n").lower()
-            if command not in base_commands:
+            command = func.input_data(f"Чекаю команду\n{BASE_COMMANDS}\n").lower()
+            if command not in BASE_COMMANDS:
                 suggestion = suggest_command(command)
                 print(suggestion)
                 continue
@@ -439,13 +432,17 @@ def main():
                     print('#'+tags)
                     for note in note_book.data[tags]:
                         print(f"{note.text}")
-        elif command == "good bye":
+        elif command == "good bye" and not exit_called:
             command = func.exit_boot(address_book.data)
-        elif command == "close":
+            exit_called = True  # Позначимо, що exit_boot була вже викликана
+            break
+        elif command == "close" and not exit_called:
             command = func.exit_boot(address_book.data)
-        elif command == "exit":
-            # func.exit_boot(address_book, classes_used)
+            exit_called = True  # Позначимо, що exit_boot була вже викликана
+            break
+        elif command == "exit" and not exit_called:
             func.exit_boot(address_book.data)
+            exit_called = True  # Позначимо, що exit_boot була вже викликана
             break
         else:
             command = ""
