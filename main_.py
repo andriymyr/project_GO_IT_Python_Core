@@ -11,6 +11,7 @@ import difflib
 from notepad import Note, Note_book
 
 
+
 class Field:
     def __init__(self, value):
         self.value = value
@@ -191,8 +192,12 @@ class AddressBook(UserDict):
         stop_check = count
         msg = None
         list = list if list == False else True
-        for i in self.data.values():  # address_book:
-            print(i)
+        records_iterator = iter(self.data.values())
+        for i in range(len(self.data)):
+            contact = next(records_iterator, None)
+            if contact is None:
+                break
+            print(contact)
             stop_check -= 1
             if list:
                 if not stop_check:
@@ -223,22 +228,25 @@ class AddressBook(UserDict):
             print(i)
         return "AddressBook"
 
-    def __iter__(self):
-        self.records_iterator = iter(self.data.values())
-        return self
+    #def __iter__(self):
+    #    self.records_iterator = iter(self.data.values())
+    #    return self
 
-    def __next__(self):
-        data = next(self.records_iterator, "")
-        if not data:
-            raise StopIteration
-        return data
+    #def __next__(self):
+    #    data = next(self.records_iterator, "")
+    #    if not data:
+    #        raise StopIteration
+    #    return data
+
+address_book = AddressBook()
+note_book = Note_book()
 
 
-def hello():
+def hello(*arg):
     print("How can I help you?")
 
 
-def add_contact(address_book):
+def add_contact(*arg):
     name = func.input_data("Введіть ім'я контакту: ")
     if name == "":
         return
@@ -252,7 +260,6 @@ def add_contact(address_book):
         if phone_value.value =="": 
             print ("Не вірно вказано номер телефлефону, повторіть ввід або вийти Enter")
         else:
-            #print(phone_value.value,"phone")
             user.add_phone(phone_value.value)
             added = True
             break
@@ -264,7 +271,6 @@ def add_contact(address_book):
         if birthday_value.value == "": 
             print ("Не вірно вказано дату дня народження, повторіть ввід або вийти Enter")
         else:
-            #print(birthday_value.value,"birt")
             user.add_birthday(birthday_value.value)
             added = True
             break
@@ -276,7 +282,6 @@ def add_contact(address_book):
         if email_value.value == None: 
             print ("Не вірно вказано e-mail, повторіть ввід або вийти Enter")
         else:
-            #print(email_value.value,"email")
             user.add_email(birthday_value.value)
             added = True
             break
@@ -287,21 +292,22 @@ def add_contact(address_book):
         print(f"Додано контакт : {user}")
 
 
-def change():
+def change(*arg):
     pass
 
 
-def find_contact():
+def find_contact(*arg):
     pass
 
 
-def show_all():
+def show_all(*arg):
     print("Вивід всіх збеорежених контактів \n")
-    address_book.show_book(0, list=False)
-    
+    #address_book.show_book(0, list=False)
+    for value in address_book.values():
+        print(value)
 
 
-def when_birthday(address_book):
+def when_birthday(*arg):
     result = func.input_data("Вкажіть ім'я контакту/(Вийти 'Enter')\n")
     if result=='':
         return
@@ -313,7 +319,7 @@ def when_birthday(address_book):
             print(f"не має запису в адресній книзі для: {result}")
 
 
-def contacts_birthday(address_book):
+def contacts_birthday(*arg):
     result = func.input_data("Вкажіть кількість днів/(Вийти 'Enter')\n")
     if result=='':
         return
@@ -327,7 +333,7 @@ def contacts_birthday(address_book):
         print(f'Через {days} днів ні в кого немає день народження')
 
 
-def cleans_folder():
+def cleans_folder(*arg):
     result = func.input_data("Вкажіть шлях до папки/(Вийти 'Enter')\n")
     if result=='':
         return
@@ -338,11 +344,11 @@ def cleans_folder():
             print(f'Невірний шлях до папки')
 
 
-def good_bye():
-    pass
+def good_bye(*arg):
+    func.exit_boot(address_book.data, note_book.data)
+    return "Good bye!"
 
-
-def add_note(note_book):
+def add_note(*arg):
     while True:
         result=func.input_data("Напишіть ключове слово(#..)/їх може бути декілька/\n")
         if result=='' or result[0]!='#':
@@ -362,7 +368,7 @@ def add_note(note_book):
         note_book.add_note(note)
 
 
-def find_note(note_book):
+def find_note(*arg):
     result = func.input_data("Напишіть ключове слово(#..)/їх може бути декілька/Вийти no\n")
     if result=='':
         return
@@ -375,11 +381,11 @@ def find_note(note_book):
         command='find_note'
 
 
-def sort_notes(note_book):
+def sort_notes(*arg):
     note_book.sort_notes()
 
 
-def show_notes(note_book):
+def show_notes(*arg):
     if note_book.data:
         for tags in note_book.data:
             print('#'+tags)
@@ -421,14 +427,15 @@ def suggest_command(user_input):
 
 
 def get_command(operator):
-    return OPERATIONS[operator]
+    return OPERATIONS.get(operator, None)
 
 
-address_book = AddressBook()
-note_book = Note_book()
+
 
 def main():
-    
+    global address_book
+    global note_book
+
     try:
         with open("adressbook.bin", "rb") as fh:
             address_book.data = pickle.load(fh)
@@ -443,9 +450,6 @@ def main():
         pass
     except FileNotFoundError:
         pass
-
-
-    
     
     while True:
         command = func.input_data(f"Чекаю команду\n{list_command}\n").lower()
@@ -453,13 +457,25 @@ def main():
             suggestion = suggest_command(command)
             print(suggestion)
             continue
-        commands=get_command(command)
-        if command == 'hello':
+
+        commands = get_command(command)
+        if commands is not None:
+            result = commands(address_book, note_book)
+            if result == "Good bye!":
+                print("Good bye!")
+                break
+        else:
+            print(f"Команда '{command}' не знайдена.")
+
+"""
+        if commands is None:
+            print(f"Команда '{command}' не знайдена.")
+        elif command == 'hello':
             result = commands()
         elif command == 'add':
-            add_contact(address_book)  # Передача `address_book` як аргумент
+            add_contact(address_book)  
         elif command == 'show all':
-            result = commands()
+            show_all(address_book)
         elif command == 'add_note':
             add_note(note_book)
         elif command == 'find_note':
@@ -480,7 +496,7 @@ def main():
         else:
             result = commands()
 
-
+"""
 
 """
     'change': change,

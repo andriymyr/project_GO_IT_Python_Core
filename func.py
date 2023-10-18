@@ -22,7 +22,7 @@ def input_data(necessary_data):
 
 @input_error
 def exit_boot(address_book, note_book):
-    print("Good bye!")
+    #print("Good bye!")
     with open("adressbook.bin", "wb") as fh:
         pickle.dump(address_book, fh)
     with open("notebook.bin", "wb") as fh:
