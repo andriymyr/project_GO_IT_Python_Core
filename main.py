@@ -8,7 +8,7 @@ import sys
 import func
 import re
 import difflib
-from notepad_old import Note, Note_book
+from notepad import Note, Note_book
 
 class Field:
     def __init__(self, value):
