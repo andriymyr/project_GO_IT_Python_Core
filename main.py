@@ -1,10 +1,11 @@
 import inspect
 import pickle
 import sys
+from pathlib import Path
 import func
 import difflib
-from notepad import Note, Note_book
-from contact import Field, Name, Address, Email, Birthday, Phone, Record, AddressBook
+from notepad import Note_book
+from contact import AddressBook
 
 
 address_book = AddressBook()
@@ -50,23 +51,28 @@ def suggest_command(user_input):
 
 
 def get_command(operator):
-    return OPERATIONS.get(operator, (None, None, None))
+    return OPERATIONS.get(operator, (None, None, None, None, None))
 
 
 def main():
     global address_book
     global note_book
     global list_command
+    global path_adress_book
+    global path_note_book
+
+    path_adress_book = Path.home() / "Contacts" / "adressbook.bin"
+    path_note_book = Path.home() / "Contacts" / "notebook.bin"
 
     try:
-        with open("adressbook.bin", "rb") as fh:
+        with open(path_adress_book, "rb") as fh:
             address_book.data = pickle.load(fh)
     except EOFError:
         pass
     except FileNotFoundError:
         pass
     try:
-        with open("notebook.bin", "rb") as fh:
+        with open(path_note_book, "rb") as fh:
             note_book.data = pickle.load(fh)
     except EOFError:
         pass
@@ -82,7 +88,9 @@ def main():
 
         command_function = get_command(command)
         if command_function is not None:
-            result = command_function(address_book, note_book, list_command)
+            result = command_function(
+                address_book, note_book, list_command, path_adress_book, path_note_book
+            )
             if result == "Good bye!":
                 print("Good bye!")
                 break
