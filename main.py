@@ -309,8 +309,7 @@ def main():
                 print(address_book.find(name))
                 result = func.input_data("Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
                 if Phone(result).value:
-                    result_one = func.input_data(
-                        "Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
+                    result_one = func.input_data("Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
             if result == 'no':
                 continue
             if result_one == 'no':

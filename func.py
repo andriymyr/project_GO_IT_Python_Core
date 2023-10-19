@@ -8,6 +8,7 @@ def input_error(func):
         try:
             result = func(*args, **kwargs)
         except (KeyError, ValueError, IndexError) as e:
+            print(e)
             return "Помилка вводу данних : "
         return result
 

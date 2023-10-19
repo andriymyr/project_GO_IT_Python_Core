@@ -114,7 +114,7 @@ class Record:
 
     def __str__(self):
         if self.birthday.value:
-            return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, Birthday: {self.birthday.value}\naddress: {self.address.value}, e-mail: {self.email.value}"
+            return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, Birthday: {self.birthday.value}, address: {self.address.value}, e-mail: {self.email.value}"
         else:
             return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
 
@@ -125,8 +125,7 @@ class Record:
         result = Phone(phone)
         if result.value:
             self.phones.append(result)
-        else:
-            print(f"телефон {phone} не додано: неправильний номер телефону")
+        #    print(f"телефон {phone} не додано: неправильний номер телефону")
 
     def add_address(self, address):
         self.address = Address(address)
@@ -138,9 +137,11 @@ class Record:
         self.email = Birthday(birthday)
 
     def remove_phone(self, phone):
-        self.phones = [p for p in self.phones if str(p) != phone]
+        self.phones = [p for p in self.phones if str(p.value) != phone]
 
     def edit_phone(self, phone_old, phone_new):
+        print(self.find_phone(phone_old),"::::", phone_old)
+        print()
         if self.find_phone(phone_old):
             self.remove_phone(phone_old)
             self.add_phone(phone_new)
@@ -155,12 +156,11 @@ class Record:
                 return Phone(phone)
         return None
 
-
     def days_to_birthday(self):
         if not self.birthday:
             return 0
         current_data = datetime.now().date()
-        birthday_date = datetime.strptime(str(self.birthday), "%d/%m/%Y").date()
+        birthday_date = datetime.strptime(str(self.birthday.value), "%d/%m/%Y").date()
         birthday_date_new = birthday_date.replace(year=current_data.year)
         if birthday_date_new >= current_data:
             return (birthday_date_new - current_data).days
@@ -209,18 +209,19 @@ class AddressBook(UserDict):
                 if not stop_check:
                     return
 
-    def contact_for_birthday(self,days):
+    def contact_for_birthday(self, days):
         now=datetime.now().date()
-        res=''
+        result=''
+        
         days_interval=timedelta(days=days)
-        for k,v in self.data.items():
-            if v.birthday.value:
+        for key, value in self.data.items():
+            if value.birthday.value:
                 date = datetime(year=now.year, month=now.month, day=now.day)+days_interval
-                birthday_date = datetime.strptime(str(v.birthday.value), "%d/%m/%Y").date()
+                birthday_date = datetime.strptime(str(value.birthday.value), "%d/%m/%Y").date()
                 birthday_date_new = birthday_date.replace(year=date.year)
                 if date.date()==birthday_date_new:
-                    res+=f'Contact name: {k} phones:'+str(*v.phones)+'\n'
-        return res
+                    result+=f'Contact name: {key} phones:'+str(*value.phones)+'\n'
+        return result
 
     def __str__(self):
         print(f"\nAddressBook list name: ")
@@ -291,9 +292,103 @@ def add_contact(*arg):
         address_book.add_record(user)
         print(f"Додано контакт : {user}")
 
+"""
+def add_contact(*arg):
+    name = func.input_data("Введіть ім'я контакту: ")
+    if name == "":
+        return
+    added = False
+    user = Record(name)  # Create a new Record object
+    while True:
+        phone = func.input_data("Введіть номер телефону (xxxxxxxxxx): ")
+        if phone == "":
+            break
+        phone_value = Phone(phone)
+        if phone_value.value == "":
+            print("Не вірно вказано номер телефону, повторіть ввід або вийдіть (Enter)")
+        else:
+            user.add_phone(phone_value.value)
+            added = True
 
-def change(*arg):
-    pass
+    while True:
+        birthday = func.input_data("Введіть дату дня народження (dd/mm/yyyy): ")
+        if birthday == "":
+            break
+        birthday_value = Birthday(birthday)
+        if birthday_value.value == "":
+            print("Не вірно вказано дату дня народження, повторіть ввід або вийдіть (Enter)")
+        else:
+            user.add_birthday(birthday_value.value)
+            added = True
+
+    while True:
+        email = func.input_data("Введіть e-mail: ")
+        if email == "":
+            break
+        email_value = Email(email)
+        if email_value.value is None:
+            print("Не вірно вказано e-mail, повторіть ввід або вийдіть (Enter)")
+        else:
+            user.add_email(email_value.value)
+            added = True
+
+    if added:
+        address = func.input_data("Введіть адресу: ")
+        user.add_address(address)
+        address_book.add_record(user)  # Add the user object to the address book
+        print(f"Додано контакт: {user}")
+
+"""
+
+
+def change_phone(*arg):
+    name = func.input_data("Введіть ім'я (Вийти 'Enter') \n")
+    contact = address_book.find(name)
+    if name == "":
+        return None
+    elif contact is None:
+        print("Немає такого контакту")
+        return None
+    print(contact)
+    phone = func.input_data("Введіть номер телефону який необхідно замінити (xxxxxxxxxx) (Вийти 'no') \n")
+    if phone == 'no':
+        return None
+    elif Phone(phone).value:
+        phone_new = func.input_data("Введіть новий номер телефону (xxxxxxxxxx) (Вийти 'no') \n")
+        if phone_new == 'no':
+            return None
+        elif Phone(phone_new).value:
+            contact = address_book.get(name)
+            contact.remove_phone(phone)  # Видалити старий номер телефону
+            contact.add_phone(phone_new)  # Додати новий номер телефону
+            address_book.data[name] = contact  # Оновити контакт у address_book
+            print(f"Змінено контакт: {contact}, новий номер телефону: {phone_new}")
+
+
+def change_email(*arg):
+    name = func.input_data("Введіть ім'я (Вийти 'Enter') \n")
+    contact = address_book.find(name)
+    if name == "":
+        return None
+    elif contact is None:
+        print("Немає такого контакту")
+        return None
+    print(contact)
+    email = func.input_data("Введіть e-mail який необхідно замінити (Вийти 'no') \n")
+    if email == 'no':
+        return None
+    elif Email(email).value:
+        email_new = func.input_data("Введіть новий номер телефону (xxxxxxxxxx) (Вийти 'no') \n")
+        if email_new == 'no':
+            return None
+        elif Email(email_new).value:
+            contact = address_book.get(name)
+            #contact.remove_phone(phone)  # Видалити старий номер телефону
+            contact.add_email(email_new)  # Додати новий номер телефону
+            address_book.data[name] = contact  # Оновити контакт у address_book
+            print(f"Змінено контакт: {contact}, новий e-mail: {email_new}")
+ 
+
 
 
 def find_contact(*arg):
@@ -318,7 +413,7 @@ def when_birthday(*arg):
         else:
             print(f"не має запису в адресній книзі для: {result}")
 
-
+@func.input_error
 def contacts_birthday(*arg):
     result = func.input_data("Вкажіть кількість днів/(Вийти 'Enter')\n")
     if result=='':
@@ -396,7 +491,8 @@ def show_notes(*arg):
 OPERATIONS = {
     'hello': hello,
     'add': add_contact,
-    'change': change,
+    'change_phone': change_phone,
+    'change_email': change_email,
     'phone': find_contact,
     'show all': show_all,
     'when_birthday': when_birthday,
