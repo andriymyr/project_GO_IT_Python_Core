@@ -125,7 +125,6 @@ class Record:
         result = Phone(phone)
         if result.value:
             self.phones.append(result)
-        #    print(f"телефон {phone} не додано: неправильний номер телефону")
 
     def add_address(self, address):
         self.address = Address(address)
@@ -134,21 +133,15 @@ class Record:
         self.email = Email(email)
 
     def add_birthday(self, birthday):
-        self.email = Birthday(birthday)
+        self.birthday = Birthday(birthday)
 
     def remove_phone(self, phone):
         self.phones = [p for p in self.phones if str(p.value) != phone]
 
     def edit_phone(self, phone_old, phone_new):
-        print(self.find_phone(phone_old),"::::", phone_old)
-        print()
         if self.find_phone(phone_old):
             self.remove_phone(phone_old)
             self.add_phone(phone_new)
-        else:
-            raise ValueError
-            # (f"Такого номера не існує: {phone}")
-        return
 
     def find_phone(self, phone):
         for i in self.phones:
@@ -229,15 +222,6 @@ class AddressBook(UserDict):
             print(i)
         return "AddressBook"
 
-    #def __iter__(self):
-    #    self.records_iterator = iter(self.data.values())
-    #    return self
-
-    #def __next__(self):
-    #    data = next(self.records_iterator, "")
-    #    if not data:
-    #        raise StopIteration
-    #    return data
 
 address_book = AddressBook()
 note_book = Note_book()
@@ -261,7 +245,8 @@ def add_contact(*arg):
         if phone_value.value =="": 
             print ("Не вірно вказано номер телефлефону, повторіть ввід або вийти Enter")
         else:
-            user.add_phone(phone_value.value)
+            #user.add_phone(phone_value.value)
+            user.add_phone(phone)
             added = True
             break
     while True:
@@ -272,7 +257,7 @@ def add_contact(*arg):
         if birthday_value.value == "": 
             print ("Не вірно вказано дату дня народження, повторіть ввід або вийти Enter")
         else:
-            user.add_birthday(birthday_value.value)
+            user.add_birthday(birthday)
             added = True
             break
     while True:
@@ -283,7 +268,7 @@ def add_contact(*arg):
         if email_value.value == None: 
             print ("Не вірно вказано e-mail, повторіть ввід або вийти Enter")
         else:
-            user.add_email(birthday_value.value)
+            user.add_email(email)
             added = True
             break
     if added:
