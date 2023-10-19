@@ -1,10 +1,10 @@
 import inspect
 import pickle
 import sys
-import func
+from . import func
 import difflib
-from notepad import Note, Note_book
-from contact import Field, Name, Address, Email, Birthday, Phone, Record, AddressBook
+from .notepad import Note_book
+from .contact import AddressBook
 
 
 address_book = AddressBook()
