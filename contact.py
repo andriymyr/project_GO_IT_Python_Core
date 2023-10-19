@@ -28,6 +28,7 @@ class Email(Field):
     def __init__(self, value):
         super().__init__(value)
         self.value = self.is_data(value)
+        self.__value = self.is_data(value)
 
     def is_data(self, email):
         try:
@@ -40,6 +41,14 @@ class Email(Field):
 
     def __str__(self):
         return f"Email: {self.value}"
+
+    @property
+    def value(self):
+        return self.__value
+
+    @value.setter
+    def value(self, value):
+        self.__value = self.is_data(value)
 
 
 class Birthday(Field):
