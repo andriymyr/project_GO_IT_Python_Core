@@ -8,6 +8,7 @@ def input_error(func):
         try:
             result = func(*args, **kwargs)
         except (KeyError, ValueError, IndexError) as e:
+            print(e)
             return "Помилка вводу данних : "
         return result
 
@@ -21,31 +22,11 @@ def input_data(necessary_data):
 
 
 @input_error
-def exit_boot(*arg):
-    print("Good bye!")
+def exit_boot(address_book, note_book):
+    #print("Good bye!")
     with open("adressbook.bin", "wb") as fh:
-        for i in arg:
-            pickle.dump(i,fh)
+        pickle.dump(address_book, fh)
+    with open("notebook.bin", "wb") as fh:
+        pickle.dump(note_book, fh)
 
     return "exit"
-
-def verification_data(value):
-    value = value.replace(".", "/")
-    day_pattern = r"\d{2}/\d{2}/\d{4}"
-    if not re.match(day_pattern, value):
-        raise ValueError("неправильний формат дати")
-    try:
-        datetime.strptime(value, "%d/%m/%Y")
-        return value
-    except ValueError:
-        #raise ValueError("неправильно вказано дату")
-        return ""
-
-def verification_emails(text):
-    """
-    перевірка правильності написання e-mail
-    """
-    text = re.findall(r"[a-zA-Z][a-zA-Z._0-9]+@\w+\.+\w\w+", text)
-    if text == []:
-        print ("Введено неправильний e-mail")
-    return text
