@@ -19,15 +19,19 @@ def input_error(func):
 @input_error
 def input_data(necessary_data):
     data = input(f"{necessary_data} ")
-    return data
+    return data.strip()
 
 
-@input_error
-def exit_boot(*arg):
-    print(work_directory, "::::::::")
-    with open("adressbook.bin", "wb") as fh:
+def exit_boot(
+    address_book,
+    note_book,
+    list_command,
+    path_adress_book,
+    path_note_book,
+):
+    with open(path_adress_book, "wb") as fh:
         pickle.dump(address_book, fh)
-    with open("notebook.bin", "wb") as fh:
+    with open(path_note_book, "wb") as fh:
         pickle.dump(note_book, fh)
 
     return "exit"
@@ -219,8 +223,16 @@ def cleans_folder(*arg):
             print(f"Невірний шлях до папки")
 
 
-def good_bye(address_book, note_book, *arg):
-    exit_boot(address_book.data, note_book.data)
+def good_bye(
+    address_book, note_book, list_command, path_adress_book, path_note_book, *arg
+):
+    exit_boot(
+        address_book.data,
+        note_book.data,
+        list_command,
+        path_adress_book,
+        path_note_book,
+    )
     return "Good bye!"
 
 
