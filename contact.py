@@ -33,7 +33,7 @@ class Email(Field):
         try:
             email = re.findall(r"[a-zA-Z][a-zA-Z._0-9]+@\w+\.+\w\w+", email)
             if email == []:
-                raise ValueError ("Введено неправильний e-mail")
+                raise ValueError("Введено неправильний e-mail")
         except:
             return None
         return email
@@ -58,7 +58,6 @@ class Birthday(Field):
             datetime.strptime(value, "%d/%m/%Y")
             return value
         except ValueError:
-            print("неправильно вказано дату")
             return ""
 
     @property
@@ -78,14 +77,14 @@ class Phone(Field):
         except ValueError:
             print("неправильний номер телефону _")
             self.value = ""
-    
+
     def __str__(self):
         return f"Phone: {self.value}"
-    
+
     def is_phone(self, value):
         phone_pattern_1 = r"^[0-9]{10}$"
         phone_pattern_2 = r"^[0-9]{12}$"
-        if (re.match(phone_pattern_1, value) == re.match(phone_pattern_2, value)):
+        if re.match(phone_pattern_1, value) == re.match(phone_pattern_2, value):
             return ""
         return value
 
@@ -99,18 +98,16 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name, birthday = ""):   
+    def __init__(self, name, birthday=""):
         self.name = Name(name)
         self.phones = []
         self.birthday = Birthday(birthday)
-        self.address = None  
-        self.email = None 
+        self.address = None
+        self.email = None
 
     def __str__(self):
-        if self.birthday.value:
-            return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, Birthday: {self.birthday.value}, address: {self.address.value}, e-mail: {self.email.value}"
-        else:
-            return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        email = "" if self.email == None else ",".join(self.email.value)
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, Birthday: {self.birthday.value}, address: {self.address.value}, e-mail: {email}"
 
     def add_phone(self, phone):
         for i in self.phones:
@@ -152,21 +149,22 @@ class Record:
         if birthday_date_new >= current_data:
             return (birthday_date_new - current_data).days
         else:
-            return (birthday_date.replace(year=(current_data.year + 1)) - current_data).days
+            return (
+                birthday_date.replace(year=(current_data.year + 1)) - current_data
+            ).days
 
 
 class AddressBook(UserDict):
-
     def add_record(self, value):
         self.data[value.name.value] = value
 
     def find(self, value):
         return self.data.get(value)
-    
+
     def find_contact(self, value):
         result = [self.data.get(contact) for contact in self.data if value in contact]
         return result
-    
+
     def find_all(self, value):
         list_contact = [str(self.data.get(contact)) for contact in self.data]
         result = [contact for contact in list_contact if value in str(contact)]
@@ -203,17 +201,22 @@ class AddressBook(UserDict):
                     return
 
     def contact_for_birthday(self, days):
-        now=datetime.now().date()
-        result=''
-        
-        days_interval=timedelta(days=days)
+        now = datetime.now().date()
+        result = ""
+
+        days_interval = timedelta(days=days)
         for key, value in self.data.items():
             if value.birthday.value:
-                date = datetime(year=now.year, month=now.month, day=now.day)+days_interval
-                birthday_date = datetime.strptime(str(value.birthday.value), "%d/%m/%Y").date()
+                date = (
+                    datetime(year=now.year, month=now.month, day=now.day)
+                    + days_interval
+                )
+                birthday_date = datetime.strptime(
+                    str(value.birthday.value), "%d/%m/%Y"
+                ).date()
                 birthday_date_new = birthday_date.replace(year=date.year)
-                if date.date()==birthday_date_new:
-                    result+=f'Contact name: {key} phones:'+str(*value.phones)+'\n'
+                if date.date() == birthday_date_new:
+                    result += f"Contact name: {key} phones:" + str(*value.phones) + "\n"
         return result
 
     def __str__(self):
@@ -221,4 +224,3 @@ class AddressBook(UserDict):
         for i in self.data.values():
             print(i)
         return "AddressBook"
-

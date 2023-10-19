@@ -1,12 +1,7 @@
-from collections import UserDict
-from datetime import datetime, timedelta
-from pathlib import Path
-import clean_folder
 import inspect
 import pickle
 import sys
 import func
-import re
 import difflib
 from notepad import Note, Note_book
 from contact import Field, Name, Address, Email, Birthday, Phone, Record, AddressBook
@@ -16,27 +11,28 @@ address_book = AddressBook()
 note_book = Note_book()
 
 
-
-
 OPERATIONS = {
-    'hello': func.hello,
-    'add': func.add_contact,
-    'change_phone': func.change_phone,
-    'change_email': func.change_email,
-    'find_contact': func.find_contact,
-    'find_all': func.find_all,
-    'show all': func.show_all,
-    'when_birthday': func.when_birthday,
-    'contacts_birthday': func.contacts_birthday,
-    'clean_folder': func.cleans_folder,
-    'good bye': func.good_bye,
-    'exit': func.good_bye,
-    'close': func.good_bye,
-    'add_note': func.add_note,
-    'find_note': func.find_note,
-    'sort_notes': func.sort_notes,
-    'show_notes': func.show_notes
-    }
+    "help": func.help,
+    "hello": func.hello,
+    "add": func.add_contact,
+    "add phone": func.add_phone,
+    "change phone": func.change_phone,
+    "change email": func.change_email,
+    "find contact": func.find_contact,
+    "find all": func.find_all,
+    "show all": func.show_all,
+    "when birthday": func.when_birthday,
+    "contacts birthday": func.contacts_birthday,
+    "clean folder": func.cleans_folder,
+    "good bye": func.good_bye,
+    "exit": func.good_bye,
+    "close": func.good_bye,
+    "add note": func.add_note,
+    "find note": func.find_note,
+    "sort notes": func.sort_notes,
+    "show notes": func.show_notes,
+    "save": func.exit_boot,
+}
 
 
 list_command = list()
@@ -54,17 +50,13 @@ def suggest_command(user_input):
 
 
 def get_command(operator):
-    #command_function, address_book = OPERATIONS.get(operator, (None, None))
-    #return command_function, address_book
-    return OPERATIONS.get(operator, (None, None))
-    #return OPERATIONS.get(operator, None), address_book, note_book
-
-
+    return OPERATIONS.get(operator, (None, None, None))
 
 
 def main():
     global address_book
     global note_book
+    global list_command
 
     try:
         with open("adressbook.bin", "rb") as fh:
@@ -80,20 +72,17 @@ def main():
         pass
     except FileNotFoundError:
         pass
-    
+
     while True:
-        command = func.input_data(f"Чекаю команду\n{list_command}\n").lower()
+        command = func.input_data(f"Чекаю команду\n").lower()
         if command not in list_command:
             suggestion = suggest_command(command)
             print(suggestion)
             continue
 
-        #commands = get_command(command)
         command_function = get_command(command)
-        #if commands is not None:
         if command_function is not None:
-            #result = commands(address_book, note_book)
-            result = command_function(address_book, note_book)
+            result = command_function(address_book, note_book, list_command)
             if result == "Good bye!":
                 print("Good bye!")
                 break
@@ -101,16 +90,10 @@ def main():
             print(f"Команда '{command}' не знайдена.")
 
 
-
 if __name__ == "__main__":
-
     classes_used = []
     for name, obj in inspect.getmembers(sys.modules[__name__]):
         if inspect.isclass(obj):
             classes_used.append(obj)
 
     main()
-
-
-
-
