@@ -46,10 +46,16 @@ def hello(*arg):
 
 
 def add_contact(address_book, *arg):
-    name = input_data("Введіть ім'я контакту: ")
-    if name == "":
-        return
-    user = Record(name)
+    while True:
+        name = input_data("Введіть ім'я контакту: ")
+        contact = address_book.find(name)
+        if contact:
+            print("Такий контакт вже існує")
+        elif name == "":
+            return
+        elif contact == None:
+            break
+        user = Record(name)
     while True:
         phone = input_data("Введіть номер телефону (xxxxxxxxxx): ")
         if phone == "":
