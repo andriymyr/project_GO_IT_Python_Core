@@ -59,7 +59,7 @@ def add_contact(address_book, *arg):
     while True:
         phone = input_data("Введіть номер телефону (xxxxxxxxxx): ")
         if phone == "":
-            break
+            return
         phone_value = Phone(phone)
         if phone_value.value == "":
             print("Не вірно вказано номер телефлефону, повторіть ввід або вийти Enter")
