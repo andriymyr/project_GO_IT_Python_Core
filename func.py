@@ -54,8 +54,8 @@ def add_contact(address_book, *arg):
         elif name == "":
             return
         elif contact == None:
+            user = Record(name)
             break
-        user = Record(name)
     while True:
         phone = input_data("Введіть номер телефону (xxxxxxxxxx): ")
         if phone == "":
