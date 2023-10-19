@@ -3,6 +3,7 @@ from .contact import Email, Birthday, Phone, Record
 from .notepad import Note
 from . import clean_folder
 
+
 def input_error(func):
     def inner(*args, **kwargs):
         try:
@@ -22,7 +23,8 @@ def input_data(necessary_data):
 
 
 @input_error
-def exit_boot(address_book, note_book):
+def exit_boot(*arg):
+    print(work_directory, "::::::::")
     with open("adressbook.bin", "wb") as fh:
         pickle.dump(address_book, fh)
     with open("notebook.bin", "wb") as fh:
