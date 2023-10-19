@@ -153,7 +153,7 @@ class Record:
         return None
 
     def days_to_birthday(self):
-        if not self.birthday:
+        if not self.birthday.value:
             return 0
         current_data = datetime.now().date()
         birthday_date = datetime.strptime(str(self.birthday.value), "%d/%m/%Y").date()
