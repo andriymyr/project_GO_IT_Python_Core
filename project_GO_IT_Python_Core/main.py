@@ -80,7 +80,7 @@ def main():
         pass
 
     while True:
-        command = func.input_data(f"Чекаю команду (перелік команд - Hepl)\n").lower()
+        command = func.input_data(f"Чекаю команду (перелік команд - Help)\n").lower()
         if command not in list_command:
             suggestion = suggest_command(command)
             print(suggestion)
