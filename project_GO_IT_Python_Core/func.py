@@ -1,7 +1,7 @@
 import pickle
-from contact import Email, Birthday, Phone, Record
-from notepad import Note
-import clean_folder
+from .contact import Email, Birthday, Phone, Record
+from .notepad import Note
+from . import clean_folder
 
 
 def input_error(func):
