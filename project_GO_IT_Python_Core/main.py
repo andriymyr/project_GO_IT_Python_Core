@@ -2,10 +2,10 @@ import inspect
 import pickle
 import sys
 from pathlib import Path
-from . import func
+import func
 import difflib
-from .notepad import Note_book
-from .contact import AddressBook
+from notepad import Note_book
+from contact import AddressBook
 
 
 address_book = AddressBook()

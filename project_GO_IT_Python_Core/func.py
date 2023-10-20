@@ -1,7 +1,7 @@
 import pickle
-from .contact import Email, Birthday, Phone, Record
-from .notepad import Note
-from . import clean_folder
+from contact import Email, Birthday, Phone, Record
+from notepad import Note
+import clean_folder
 
 
 def input_error(func):
@@ -242,7 +242,7 @@ def good_bye(
     return "Good bye!"
 
 
-def add_note(note_book, *arg):
+def add_note(address_book, note_book, *arg):
     while True:
         result = input_data("Напишіть ключове слово(#..)/їх може бути декілька/\n")
         if result == "" or result[0] != "#":
@@ -262,7 +262,7 @@ def add_note(note_book, *arg):
         note_book.add_note(note)
 
 
-def find_note(note_book, *arg):
+def find_note(address_book, note_book, *arg):
     result = input_data("Напишіть ключове слово(#..)/їх може бути декілька/Вийти no\n")
     if result == "":
         return
@@ -275,11 +275,11 @@ def find_note(note_book, *arg):
         command = "find_note"
 
 
-def sort_notes(note_book, *arg):
+def sort_notes(address_book, note_book, *arg):
     note_book.sort_notes()
 
 
-def show_notes(note_book, *arg):
+def show_notes(address_book, note_book, *arg):
     if note_book.data:
         for tags in note_book.data:
             print("#" + tags)
