@@ -1,0 +1,2 @@
+[console_scripts]
+bot_helper = project_GO_IT_Python_Core.main:main

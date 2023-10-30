@@ -1,0 +1,14 @@
+README.md
+setup.py
+bot_helper.egg-info/PKG-INFO
+bot_helper.egg-info/SOURCES.txt
+bot_helper.egg-info/dependency_links.txt
+bot_helper.egg-info/entry_points.txt
+bot_helper.egg-info/requires.txt
+bot_helper.egg-info/top_level.txt
+project_GO_IT_Python_Core/__init__.py
+project_GO_IT_Python_Core/clean_folder.py
+project_GO_IT_Python_Core/contact.py
+project_GO_IT_Python_Core/func.py
+project_GO_IT_Python_Core/main.py
+project_GO_IT_Python_Core/notepad.py
